@@ -114,7 +114,7 @@ class Fitter(object):
                     lower = min(self.x)
                     upper = self.x[N_lr+index]
                     N_i *= (N_lr - index) / N_lr
-                elif index > (len(self.x) - (N_lr + 1):
+                elif index > (len(self.x) - (N_lr + 1)):
                     lower = self.x[index-N_lr]
                     upper = self.x[-1]
                     N_i *= (len(self.x) - index)/N_lr
