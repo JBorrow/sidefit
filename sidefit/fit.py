@@ -25,7 +25,6 @@ class Fitter(object):
             y: np.ndarray,
             points_x: np.ndarray,
             points_y: np.ndarray,
-            tol: float,
         ):
         """
         Inputs
@@ -33,10 +32,10 @@ class Fitter(object):
 
         @param x | np.ndarray | the x-values of the _model_.
         @param y | np.ndarray | the y-values of the _model_.
-        @param points | np.ndarray | the points to find nearest values
-                                     in the interpolated model to.
-        @param tol | float | controls how fine-grained interpolation
-                             of the model values is.
+        @param points_x | np.ndarray | the points to find nearest values
+                                       in the interpolated model to.
+        @param points_y | np.ndarray | the points to find nearest values
+                                       in the interpolated model to.
 
 
         Outputs
@@ -50,7 +49,6 @@ class Fitter(object):
         self.y = y
         self.points_x = points_x
         self.points_y = points_y
-        self.tol = tol
 
 
         return
@@ -59,7 +57,8 @@ class Fitter(object):
     def interpolate_function(self, kind="linear"):
         """
         Interpolate the function; this is essentailly just a local wrapper 
-        over scipy.intepolate.
+        over scipy.intepolate. It is best to leave the 'kind' as "linear" for
+        things like a step function; higher degrees can overfit.
 
         Inputs
         ------
@@ -87,6 +86,10 @@ class Fitter(object):
         The 'brute force' implementation of neighbor finding. This is
         O(n), as we search through the function self.interp to find 
         the closest 'point'.
+
+        This works by _brute force_. This means that it takes 2xN_lr points
+        around the current value and interpolates that by N points; these are
+        all then calculated and the mnimial value of r is found.
 
         Inputs
         ------
@@ -122,6 +125,8 @@ class Fitter(object):
                     lower = self.x[index-N_lr]
                     upper = self.x[index+N_lr]
 
+                # Actual brute force algorithm calculation
+
                 x0, fval, _, _ = so.brute(
                     r2,
                     ranges=[(lower,upper)],
@@ -130,11 +135,14 @@ class Fitter(object):
                     full_output=True
                 )
 
+                # Our function actually calculates r^2.
+
                 self.r[index] = np.sqrt(fval)
             except ValueError:
-                # Must be edge of box.
+                # Must be edge of box. This must just be dy.
 
-                self.r[index] = 0.0
+                dy = self.points_y[index] - self.interp(self.points_x[index])
+                self.r[index] = abs(dy)
 
         return self.r
 

@@ -53,21 +53,24 @@ def test_integration_heaviside():
     true = get_true_data()
     smooth = get_smoothed_data()
 
-    fit = Fitter(*true, *smooth, 0.1)
+    fit = Fitter(*true, *smooth)
 
     interp = fit.interpolate_function()
-    r = fit.brute_force()
+    r = fit.brute_force(N_lr=50, N=1000)
 
-    fig, ax = plt.subplots(2, 1)
+    fig, ax = plt.subplots(2, 1, sharex=True)
 
-    ax[0].plot(true[0], interp(true[0]))
-    ax[0].scatter(*smooth)
+    ax[0].plot(true[0], interp(true[0]), label="Interpolated function")
+    ax[0].scatter(*smooth, label="Smoothed points")
+
 
     ax[0].set_xlim(-0.05, 0.05)
-    ax[1].set_xlim(-0.05, 0.05)
 
-    #ax[1].plot(true[0], simple(smooth[0], smooth[1], interp), alpha=0.5)
     ax[1].plot(true[0], r)
+
+    ax[0].set_ylabel("f(x)")
+    ax[1].set_ylabel("dr")
+    ax[1].set_xlabel("x")
 
     plt.savefig("test_integration_heaviside.png")
 
@@ -83,7 +86,7 @@ def test_plot_heaviside():
     true = get_true_data()
     smooth = get_smoothed_data()
 
-    fit = Fitter(*true, *smooth, 0.1)
+    fit = Fitter(*true, *smooth)
 
     interp = fit.interpolate_function()
 
@@ -102,6 +105,10 @@ def test_plot_heaviside():
     ax[0].plot(x, y)
     ax[1].scatter(px, py)
     ax[1].plot(x, interp(x))
+
+    ax[0].set_ylabel("dr")
+    ax[1].set_ylabel("f(x)")
+    ax[1].set_xlabel("x value (lower), dx value (top)")
     plt.savefig("test_plot_heaviside.png")
 
 
